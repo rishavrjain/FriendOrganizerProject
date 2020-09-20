@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace FriendOrganizerUI.ViewModel
 {
-    public class ViewModelBaseClass : INotifyPropertyChanged
+    public class ViewModelBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
