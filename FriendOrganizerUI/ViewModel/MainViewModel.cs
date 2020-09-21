@@ -1,8 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using FriendOrganizer.Model;
-using FriendOrganizerUI.Data;
+﻿using System.Threading.Tasks;
 
 namespace FriendOrganizerUI.ViewModel
 {
