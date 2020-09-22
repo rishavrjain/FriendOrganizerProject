@@ -6,7 +6,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FriendOrganizerUI.Data
+namespace FriendOrganizerUI.Data.Lookups
 {
     public class LookupDataService : IFriendLookupDataService
     {

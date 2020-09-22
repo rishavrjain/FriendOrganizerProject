@@ -10,7 +10,7 @@ namespace FriendOrganizerUI.Wrapper
     public class NotifyDataErrorInfoBase : ViewModelBase, INotifyDataErrorInfo
     {
         private Dictionary<string, List<string>> _errorsByPropertyName
-    = new Dictionary<string, List<string>>();
+            = new Dictionary<string, List<string>>();
 
         public bool HasErrors => _errorsByPropertyName.Any();
 
@@ -50,7 +50,5 @@ namespace FriendOrganizerUI.Wrapper
                 OnErrorChanged(propertyName);
             }
         }
-
     }
 }
-

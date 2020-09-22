@@ -1,4 +1,5 @@
 ﻿using FriendOrganizerUI.Data;
+using FriendOrganizerUI.Data.Lookups;
 using FriendOrganizerUI.Events;
 using Prism.Events;
 using System.Collections.ObjectModel;
@@ -33,28 +34,11 @@ namespace FriendOrganizerUI.ViewModel
             Friends.Clear();
             foreach (var item in lookup)
             {
-                Friends.Add(new NavigationItemViewModel(item.Id,item.DisplayMember));
+                Friends.Add(new NavigationItemViewModel(item.Id,item.DisplayMember,
+                    _eventAggregator));
             }
         }
 
         public ObservableCollection<NavigationItemViewModel> Friends { get; }
-
-        private NavigationItemViewModel _selectedFriend;
-
-        public NavigationItemViewModel SelectedFriend
-        {
-            get { return _selectedFriend; }
-            set 
-            {
-                _selectedFriend = value;
-                OnPropertyChanged();
-                if (_selectedFriend != null)
-                {
-                    _eventAggregator.GetEvent<OpenFriendDetailsViewEvent>()
-                        .Publish(_selectedFriend.Id);
-                }
-            }
-        }
-
     }
 }
