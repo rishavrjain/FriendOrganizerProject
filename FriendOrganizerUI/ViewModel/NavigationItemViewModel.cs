@@ -37,7 +37,7 @@ namespace FriendOrganizerUI.ViewModel
         private void OnOpenFriendDetailView()
         {
             _eventAggregator.GetEvent<OpenFriendDetailsViewEvent>()
-    .Publish(Id);
+                .Publish(Id);
         }
 
     }
