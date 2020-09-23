@@ -2,7 +2,7 @@
 
 namespace FriendOrganizerUI.Events
 {
-    public class OpenFriendDetailsViewEvent:PubSubEvent<int?>
+    public class AfterFriendDeletedEvent:PubSubEvent<int>
     {
     }
 }

@@ -5,15 +5,33 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FriendOrganizerUI"
         xmlns:view="clr-namespace:FriendOrganizerUI.View" 
+        xmlns:viewModel="clr-namespace:FriendOrganizerUI.ViewModel" 
         mc:Ignorable="d"
         Title="FriendOrganizer" FontSize ="20" Height="450" Width="800">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type viewModel:FriendDetailViewModel}">
+            <view:FriendDetailView/>
+        </DataTemplate>
+    </Window.Resources>
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <view:NavigationView DataContext="{Binding NavigationViewModel}"/>
-        <view:FriendDetailView Grid.Column="1" DataContext="{Binding FriendDetailViewModel}"/>
+        <Menu Grid.ColumnSpan="2" FontSize="20">
+            <MenuItem Header="Create">
+                <MenuItem Header="New Friend" Command="{Binding CreateNewFriendCommand}"/>
+            </MenuItem>
+        </Menu>
+        <view:NavigationView Grid.Row="1"
+                             DataContext="{Binding NavigationViewModel}"/>
+        <ContentControl Grid.Row="1"
+                               Grid.Column="1" 
+                               Content="{Binding FriendDetailViewModel}"/>
 
     </Grid>
 </Window>
