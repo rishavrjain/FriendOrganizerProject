@@ -89,6 +89,8 @@
     <Compile Include="Data\Lookups\LookupDataService.cs" />
     <Compile Include="Data\Repositories\GenericRepository.cs" />
     <Compile Include="Data\Repositories\IGenericRepository.cs" />
+    <Compile Include="Data\Repositories\IMeetingRepository.cs" />
+    <Compile Include="Data\Repositories\MeetingRepository.cs" />
     <Compile Include="Events\AfterDetailDeletedEvent.cs" />
     <Compile Include="Events\AfterDetailSavedEvent.cs" />
     <Compile Include="Events\OpenDetailViewEvent.cs" />
