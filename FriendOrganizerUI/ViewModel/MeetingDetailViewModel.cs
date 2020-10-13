@@ -1,5 +1,6 @@
 ﻿using FriendOrganizer.Model;
 using FriendOrganizerUI.Data.Repositories;
+using FriendOrganizerUI.Events;
 using FriendOrganizerUI.View.Services;
 using FriendOrganizerUI.Wrapper;
 using Prism.Commands;
@@ -18,18 +19,17 @@ namespace FriendOrganizerUI.ViewModel
     {
         private IMeetingRepository _meetingRepository;
         private MeetingWrapper _meeting;
-        private IMessageDialogService _messageDialogService;
-
         private Friend _selectedAvailableFriend;
         private Friend _selectedAddedFriend;
         private List<Friend> _allFriends;
 
         public MeetingDetailViewModel(IEventAggregator eventAggregator,
             IMessageDialogService messageDialogService,
-            IMeetingRepository meetingRepository) : base(eventAggregator)
+            IMeetingRepository meetingRepository) : base(eventAggregator,messageDialogService)
         {
             _meetingRepository = meetingRepository;
-            _messageDialogService = messageDialogService;
+            eventAggregator.GetEvent<AfterDetailSavedEvent>().Subscribe(AfterDetailSaved);
+            eventAggregator.GetEvent<AfterDetailDeletedEvent>().Subscribe(AfterDetailDeleted);
 
             AddedFriends = new ObservableCollection<Friend>();
             AvailableFriends = new ObservableCollection<Friend>();
@@ -77,12 +77,14 @@ namespace FriendOrganizerUI.ViewModel
             }
         }
 
-        public override async Task LoadAsync(int? meetingId)
+        public override async Task LoadAsync(int meetingId)
         {
-            var meeting = meetingId.HasValue
-                ? await _meetingRepository.GetByIdAsync(meetingId.Value)
+            var meeting = meetingId > 0
+                ? await _meetingRepository.GetByIdAsync(meetingId)
                 : CreateNewMeeting();
 
+            Id = meetingId;
+            
             InitializeMeeting(meeting);
 
             _allFriends = await _meetingRepository.GetAllFriendsAsync();
@@ -142,7 +144,7 @@ namespace FriendOrganizerUI.ViewModel
 
         protected override void OnDeleteExecute()
         {
-            var result = _messageDialogService.ShowOkCancelResult($"Do you really want to delete the meeting {Meeting.Title}?", "Question");
+            var result = MessageDialogService.ShowOkCancelResult($"Do you really want to delete the meeting {Meeting.Title}?", "Question");
             if (result == MessageDialogResult.OK)
             {
                 _meetingRepository.Remove(Meeting.Model);
@@ -160,7 +162,27 @@ namespace FriendOrganizerUI.ViewModel
         {
             await _meetingRepository.SaveAsync();
             HasChanges = _meetingRepository.HasChanges();
+            Id = Meeting.Id;
             RaiseDetailSavedEvent(Meeting.Id, Meeting.Title);
+        }
+
+        private async void AfterDetailSaved(AfterDetailSavedEventArgs args)
+        {
+            if(args.ViewModelName == nameof(FriendDetailViewModel))
+            {
+                await  _meetingRepository.ReloadFriendAsync(args.Id);
+                _allFriends = await _meetingRepository.GetAllFriendsAsync();
+                SetupPicklist();
+            }
+        }
+
+        private async void AfterDetailDeleted(AfterDetailDeletedEventArgs args)
+        {
+            if(args.ViewModelName == nameof(FriendDetailViewModel))
+            {
+                _allFriends = await _meetingRepository.GetAllFriendsAsync();
+                SetupPicklist();
+            }
         }
 
         private void InitializeMeeting(FriendOrganizer.Model.Meeting meeting)
@@ -177,6 +199,10 @@ namespace FriendOrganizerUI.ViewModel
                 {
                     ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
                 }
+                if (e.PropertyName == nameof(Meeting.Title))
+                {
+                    SetTitle();
+                }
             };
             ((DelegateCommand)SaveCommand).RaiseCanExecuteChanged();
 
@@ -185,6 +211,12 @@ namespace FriendOrganizerUI.ViewModel
                 // Trick to trigger validation
                 Meeting.Title = "";
             }
+            SetTitle();
+        }
+
+        private void SetTitle()
+        {
+            Title = Meeting.Title;
         }
 
         private Meeting CreateNewMeeting()
