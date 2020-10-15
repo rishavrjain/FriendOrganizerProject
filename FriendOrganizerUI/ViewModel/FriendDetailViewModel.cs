@@ -166,10 +166,13 @@ namespace FriendOrganizerUI.ViewModel
 
         protected override async void OnSaveExecute()
         {
-            await _friendRepository.SaveAsync();
-            HasChanges = _friendRepository.HasChanges();
-            Id = Friend.Id;
-            RaiseDetailSavedEvent(Friend.Id, $"{Friend.FirstName} {Friend.LastName}");
+            await SaveWithOptimisticConcurrencyAsync(_friendRepository.SaveAsync,
+                () =>
+                {
+                    HasChanges = _friendRepository.HasChanges();
+                    Id = Friend.Id;
+                    RaiseDetailSavedEvent(Friend.Id, $"{Friend.FirstName} {Friend.LastName}");
+                });            
         }
 
         protected override bool OnSaveCanExecute()
@@ -184,10 +187,10 @@ namespace FriendOrganizerUI.ViewModel
         {
             if(await _friendRepository.HasMeetingsAsync(Friend.Id))
             {
-                MessageDialogService.ShowInfoDialog($"{Friend.FirstName} {Friend.LastName} can't be deleted, as this friend is part of atleast one meeting");
+                await MessageDialogService.ShowInfoDialogAsync($"{Friend.FirstName} {Friend.LastName} can't be deleted, as this friend is part of atleast one meeting");
                 return;
             }
-            var result = MessageDialogService.ShowOkCancelResult($"Do you really want to delete the friend {Friend.FirstName} {Friend.LastName}?",
+            var result = await MessageDialogService.ShowOkCancelDialogAsync($"Do you really want to delete the friend {Friend.FirstName} {Friend.LastName}?",
                 "Question");
             if(result == MessageDialogResult.OK)
             {
