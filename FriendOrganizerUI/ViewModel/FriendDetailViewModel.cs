@@ -6,7 +6,6 @@ using FriendOrganizerUI.View.Services;
 using FriendOrganizerUI.Wrapper;
 using Prism.Commands;
 using Prism.Events;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -31,6 +30,9 @@ namespace FriendOrganizerUI.ViewModel
         {
             _friendRepository = friendRepository;
             _programmingLanguageLookupDataService = programmingLanguageLookupDataService;
+
+            eventAggregator.GetEvent<AfterCollectionSavedEvent>()
+                .Subscribe(AfterCollectionSaved);
 
             AddPhoneNumberCommand = new DelegateCommand(OnAddPhoneNumberExecute);
             RemovePhoneNumberCommand = new DelegateCommand(OnRemovePhoneNumberExecute, OnRemovePhoneNumberCanExecute);
@@ -155,6 +157,13 @@ namespace FriendOrganizerUI.ViewModel
             }
         }
 
+        private Friend CreateNewFriend()
+        {
+            var friend = new Friend();
+            _friendRepository.Add(friend);
+            return friend;
+        }
+
         protected override async void OnSaveExecute()
         {
             await _friendRepository.SaveAsync();
@@ -212,11 +221,12 @@ namespace FriendOrganizerUI.ViewModel
             newNumber.Number = ""; // Trigger validation
         }
 
-        private Friend CreateNewFriend()
+        private async void AfterCollectionSaved(AfterCollectionSavedEventArgs args)
         {
-            var friend = new Friend();
-            _friendRepository.Add(friend);
-            return friend;
+            if(args.ViewModelName == nameof(ProgrammingLanguageDetailViewModel))
+            {
+                await LoadProgrammingLanguagesLookupAsync();
+            }
         }
     }
 }

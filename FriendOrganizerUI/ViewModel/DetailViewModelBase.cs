@@ -2,11 +2,6 @@
 using FriendOrganizerUI.View.Services;
 using Prism.Commands;
 using Prism.Events;
-using System;
-using System.Collections.Generic;
-using System.Data.Entity.Core.Common.CommandTrees;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -28,26 +23,6 @@ namespace FriendOrganizerUI.ViewModel
             SaveCommand = new DelegateCommand(OnSaveExecute, OnSaveCanExecute);
             DeleteCommand = new DelegateCommand(OnDeleteExecute);
             CloseDetailViewCommand = new DelegateCommand(OnCloseDetailViewExecute);
-        }
-
-        protected virtual void OnCloseDetailViewExecute()
-        {
-            if (HasChanges)
-            {
-                var result = MessageDialogService.ShowOkCancelResult(
-                    "You've made changes. Close this item?", "Question");
-                if(result == MessageDialogResult.Cancel)
-                {
-                    return;
-                }
-            }
-
-            EventAggregator.GetEvent<AfterDetailClosedEvent>()
-                .Publish(new AfterDetailClosedEventArgs
-                {
-                    Id = this.Id,
-                    ViewModelName = this.GetType().Name
-                });
         }
 
         public ICommand SaveCommand { get; private set; }
@@ -86,12 +61,6 @@ namespace FriendOrganizerUI.ViewModel
 
         public abstract Task LoadAsync(int id);
 
-        protected abstract void OnDeleteExecute();
-
-        protected abstract void OnSaveExecute();
-
-        protected abstract bool OnSaveCanExecute();
-
         protected virtual void RaiseDetailDeletedEvent(int modelId)
         {
             EventAggregator.GetEvent<AfterDetailDeletedEvent>().Publish(
@@ -112,5 +81,40 @@ namespace FriendOrganizerUI.ViewModel
                     ViewModelName = this.GetType().Name
                 });
         }
+
+        protected virtual void RaiseCollectionSavedEvent()
+        {
+            EventAggregator.GetEvent<AfterCollectionSavedEvent>()
+                .Publish(new AfterCollectionSavedEventArgs
+                {
+                    ViewModelName = this.GetType().Name
+                });
+        }
+
+        protected virtual void OnCloseDetailViewExecute()
+        {
+            if (HasChanges)
+            {
+                var result = MessageDialogService.ShowOkCancelResult(
+                    "You've made changes. Close this item?", "Question");
+                if (result == MessageDialogResult.Cancel)
+                {
+                    return;
+                }
+            }
+
+            EventAggregator.GetEvent<AfterDetailClosedEvent>()
+                .Publish(new AfterDetailClosedEventArgs
+                {
+                    Id = this.Id,
+                    ViewModelName = this.GetType().Name
+                });
+        }
+
+        protected abstract void OnDeleteExecute();
+
+        protected abstract void OnSaveExecute();
+
+        protected abstract bool OnSaveCanExecute();
     }
 }

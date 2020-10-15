@@ -19,7 +19,7 @@ namespace FriendOrganizerUI.ViewModel
         private IDetailViewModel _selectedDetailViewModel;
 
         public MainViewModel(INavigationViewModel navigationViewModel,
-            IIndex<string,IDetailViewModel> detailViewModelCreator,
+            IIndex<string, IDetailViewModel> detailViewModelCreator,
             IEventAggregator eventAggregator,
             IMessageDialogService messageDialogService)
         {
@@ -37,6 +37,7 @@ namespace FriendOrganizerUI.ViewModel
                 .Subscribe(AfterDetailClosed);
 
             CreateNewDetailCommand = new DelegateCommand<Type>(OnCreateNewDetailExecute);
+            OpenSingleDetailViewCommand = new DelegateCommand<Type>(OnOpenSingleDetailViewExecute);
 
             NavigationViewModel = navigationViewModel;
         }
@@ -48,6 +49,8 @@ namespace FriendOrganizerUI.ViewModel
 
         public ICommand CreateNewDetailCommand { get; }
 
+        public ICommand OpenSingleDetailViewCommand { get; }
+
         public INavigationViewModel NavigationViewModel { get; }
 
         public ObservableCollection<IDetailViewModel> DetailViewModels { get; }
@@ -55,7 +58,7 @@ namespace FriendOrganizerUI.ViewModel
         public IDetailViewModel SelectedDetailViewModel
         {
             get { return _selectedDetailViewModel; }
-            set 
+            set
             {
                 _selectedDetailViewModel = value;
                 OnPropertyChanged();
@@ -64,7 +67,7 @@ namespace FriendOrganizerUI.ViewModel
 
         private async void OnOpenDetailView(OpenDetailViewEventArgs args)
         {
-            var detailViewModel =  DetailViewModels.SingleOrDefault(
+            var detailViewModel = DetailViewModels.SingleOrDefault(
                 vm => vm.Id == args.Id
             && vm.GetType().Name == args.ViewModelName);
 
@@ -79,16 +82,30 @@ namespace FriendOrganizerUI.ViewModel
         }
 
         private int nextNewItemId = 0;
+
         private void OnCreateNewDetailExecute(Type viewModelType)
         {
             OnOpenDetailView(
-                new OpenDetailViewEventArgs { Id = nextNewItemId--,
-                    ViewModelName = viewModelType.Name });
+                new OpenDetailViewEventArgs
+                {
+                    Id = nextNewItemId--,
+                    ViewModelName = viewModelType.Name
+                });
+        }
+
+        private void OnOpenSingleDetailViewExecute(Type viewModelType)
+        {
+            OnOpenDetailView(
+                new OpenDetailViewEventArgs
+                {
+                    Id = -1,
+                    ViewModelName = viewModelType.Name
+                });
         }
 
         private void AfterDetailDeleted(AfterDetailDeletedEventArgs args)
         {
-            RemoveDetailViewModel(args.Id,args.ViewModelName);
+            RemoveDetailViewModel(args.Id, args.ViewModelName);
         }
 
         private void AfterDetailClosed(AfterDetailClosedEventArgs args)
